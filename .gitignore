@@ -1,0 +1,16 @@
+# Python cache
+__pycache__/
+*.pyc
+
+# Builds / executables
+*.exe
+dist/
+build/
+
+# Virtual environments
+venv/
+.env
+
+# OS junk
+.DS_Store
+Thumbs.db
