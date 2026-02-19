@@ -5,6 +5,12 @@ Supports a toggleable press loop with adjustable delay and audio feedback for st
 
 ---
 
+## Screenshot
+
+![Desktop Automation UI](screenshot.png)
+
+---
+
 ## Features
 
 - Global hotkey to toggle automation on and off  
