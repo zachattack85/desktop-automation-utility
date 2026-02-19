@@ -12,7 +12,8 @@ Supports a toggleable key-press loop with adjustable delay, persistent configura
 ## Screenshot
 
 <p align="center">
-  <img src="screenshot.png" width="450"/>
+  <img src="screenshot.png?v=2" width="450"/>
+
 </p>
 
 
