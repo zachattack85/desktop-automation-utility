@@ -5,8 +5,11 @@
 
 A configurable hotkey-driven desktop automation utility built in Python.
 
-Supports a toggleable key press loop with adjustable delay and audio feedback for activation and deactivation.  
+Supports a toggleable key press loop with adjustable delay, persistent settings,
+and audio feedback for activation and deactivation.
+
 Designed to simplify repetitive desktop tasks with a lightweight, hotkey-based workflow.
+
 
 
 
@@ -55,7 +58,19 @@ Designed to simplify repetitive desktop tasks with a lightweight, hotkey-based w
 ## Requirements
 
 - Python 3.9+
-- Windows OS (global hotkey support uses the `keyboard` library)
+- Windows OS (global hotkey functionality requires the `keyboard` library)
+
+
+---
+
+## Why I Built This
+
+This project was built to explore:
+- Global hotkey handling
+- GUI application structure with Tkinter
+- Background threading for non-blocking execution
+- Persistent configuration storage
+- Clean separation between UI and automation logic
 
 ---
 
