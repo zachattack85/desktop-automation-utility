@@ -3,9 +3,11 @@
 ![Python](https://img.shields.io/badge/Python-3.x-blue)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
-A configurable hotkey-driven desktop automation utility built in Python.  
-Supports a toggleable key press loop with adjustable delay and audio feedback for activation and deactivation.
+A configurable hotkey-driven desktop automation utility built in Python.
+
+Supports a toggleable key press loop with adjustable delay and audio feedback for activation and deactivation.  
 Designed to simplify repetitive desktop tasks with a lightweight, hotkey-based workflow.
+
 
 
 ---
@@ -13,8 +15,9 @@ Designed to simplify repetitive desktop tasks with a lightweight, hotkey-based w
 ## Screenshot
 
 <p align="center">
-  <img src="screenshot.png" alt="Desktop Automation Utility UI" width="400"/>
+  <img src="screenshot.png" width="400"/>
 </p>
+
 
 
 ---
@@ -46,6 +49,13 @@ Designed to simplify repetitive desktop tasks with a lightweight, hotkey-based w
 - pyautogui (simulated key presses)  
 - Pillow (image support for UI)  
 - playsound (audio feedback)  
+
+---
+
+## Requirements
+
+- Python 3.9+
+- Windows OS (global hotkey support uses the `keyboard` library)
 
 ---
 
