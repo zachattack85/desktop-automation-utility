@@ -7,7 +7,10 @@ Supports a toggleable press loop with adjustable delay and audio feedback for st
 
 ## Screenshot
 
-![Desktop Automation UI](screenshot.png)
+<p align="center">
+  <img src="screenshot.png" alt="Desktop Automation Utility UI" width="400"/>
+</p>
+
 
 ---
 
