@@ -1,9 +1,9 @@
 import json
+import os
 import threading
 import time
-from dataclasses import dataclass
+from dataclasses import dataclass, asdict
 from pathlib import Path
-from typing import Optional
 import sys
 import tkinter as tk
 from tkinter import messagebox
@@ -33,16 +33,16 @@ def resource_path(rel_path: str) -> Path:
     Resolve a resource path that works both in normal execution and when bundled
     (e.g., PyInstaller onefile).
     """
-    if getattr(sys, "frozen", False) and hasattr(sys, "_MEIPASS"):
+    if getattr(sys, "frozen", False):
         base = Path(getattr(sys, "_MEIPASS"))
     else:
         base = Path(__file__).parent
     return base / rel_path
 
 
-ACTIVATE_WAV = resource_path("assets/activate.wav")
-DEACTIVATE_WAV = resource_path("assets/deactivate.wav")
-ICON_PATH = resource_path("assets/desktop_automation_utility.ico")
+ACTIVATE_WAV = resource_path("activate.wav")
+DEACTIVATE_WAV = resource_path("deactivate.wav")
+ICON_PATH = resource_path("alliance_icon.ico")
 
 
 # -----------------------------
@@ -72,13 +72,11 @@ class AppSettings:
     def save(self) -> None:
         try:
             APP_DIR.mkdir(parents=True, exist_ok=True)
-            SETTINGS_PATH.write_text(
-                json.dumps(
-                    {"key": self.target_key, "combo": self.hotkey, "delay": self.delay_ms},
-                    indent=2,
-                ),
-                encoding="utf-8",
-            )
+            SETTINGS_PATH.write_text(json.dumps({
+                "key": self.target_key,
+                "combo": self.hotkey,
+                "delay": self.delay_ms
+            }, indent=2), encoding="utf-8")
         except Exception as e:
             print(f"[settings] Failed to save settings: {e}")
 
@@ -91,14 +89,7 @@ def play_sound(path: Path) -> None:
     """Play sound without blocking UI; ignore if missing."""
     if not path.exists():
         return
-
-    def _worker():
-        try:
-            playsound(str(path))
-        except Exception as e:
-            print(f"[sound] Failed to play {path.name}: {e}")
-
-    threading.Thread(target=_worker, daemon=True).start()
+    threading.Thread(target=playsound, args=(str(path),), daemon=True).start()
 
 
 # -----------------------------
@@ -112,44 +103,41 @@ class AutoKeyPresser:
     """
     def __init__(self, on_toggle=None):
         self._stop_event = threading.Event()
-        self._worker: Optional[threading.Thread] = None
+        self._worker: threading.Thread | None = None
 
         self.is_active = False
         self.delay_s = DEFAULT_DELAY_MS / 1000.0
         self.target_key = DEFAULT_TARGET_KEY
+        self.hotkey = DEFAULT_HOTKEY
 
         self.on_toggle = on_toggle
+        self._register_hotkey(self.hotkey)
 
-        # IMPORTANT: store the hotkey "id" returned by keyboard.add_hotkey
-        self.hotkey = DEFAULT_HOTKEY
-        self._hotkey_id = None
-        self.set_hotkey(self.hotkey)
+    def _register_hotkey(self, combo: str) -> None:
+        try:
+            keyboard.add_hotkey(combo, self.toggle)
+        except Exception as e:
+            print(f"[hotkey] Failed to register hotkey '{combo}': {e}")
+
+    def _unregister_hotkey(self, combo: str) -> None:
+        try:
+            keyboard.remove_hotkey(combo)
+        except Exception:
+            pass
 
     def set_target_key(self, key: str) -> None:
         self.target_key = key
 
     def set_delay_ms(self, delay_ms: int) -> None:
-        delay_ms = max(1, int(delay_ms))
-        self.delay_s = delay_ms / 1000.0
+        self.delay_s = max(1, delay_ms) / 1000.0
 
     def set_hotkey(self, combo: str) -> None:
-        combo = (combo or "").strip()
         if not combo:
             return
-
-        # remove old hotkey binding (by id) so it doesn't stack
-        try:
-            if self._hotkey_id is not None:
-                keyboard.remove_hotkey(self._hotkey_id)
-        except Exception:
-            pass
-
+        # remove old, add new
+        self._unregister_hotkey(self.hotkey)
         self.hotkey = combo
-        try:
-            self._hotkey_id = keyboard.add_hotkey(combo, self.toggle)
-        except Exception as e:
-            self._hotkey_id = None
-            print(f"[hotkey] Failed to register hotkey '{combo}': {e}")
+        self._register_hotkey(combo)
 
     def toggle(self) -> None:
         if self.is_active:
@@ -176,15 +164,6 @@ class AutoKeyPresser:
         if self.on_toggle:
             self.on_toggle(False)
 
-    def shutdown(self) -> None:
-        """Stop automation and unregister hotkeys."""
-        self.stop()
-        try:
-            if self._hotkey_id is not None:
-                keyboard.remove_hotkey(self._hotkey_id)
-        except Exception:
-            pass
-
     def _loop(self) -> None:
         while not self._stop_event.is_set():
             try:
@@ -205,14 +184,8 @@ class DesktopAutomationUI:
         self.root.geometry("420x520")
         self.root.configure(bg="#0e1a40")
 
-        # Optional window icon (won't crash if missing)
-        try:
-            if ICON_PATH.exists():
-                self.root.iconbitmap(str(ICON_PATH))
-        except Exception:
-            pass
-
         self.settings = AppSettings.load()
+
         self.presser = AutoKeyPresser(on_toggle=self.update_status)
 
         # Apply loaded settings to core
@@ -221,30 +194,22 @@ class DesktopAutomationUI:
         self.presser.set_hotkey(self.settings.hotkey)
 
         self._logo = None  # keep reference
-        self.hotkey_candidate: str = self.settings.hotkey
+        self.hotkey_candidate: str | None = self.settings.hotkey
 
         self.build_ui()
         self.populate_fields()
 
-        # Show-window hotkey
-        self._show_hotkey_id = None
-        try:
-            self._show_hotkey_id = keyboard.add_hotkey(SHOW_WINDOW_HOTKEY, self.show_window)
-        except Exception as e:
-            print(f"[hotkey] Failed to register show-window hotkey '{SHOW_WINDOW_HOTKEY}': {e}")
+        keyboard.add_hotkey(SHOW_WINDOW_HOTKEY, self.show_window)
 
         # Clean shutdown
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
 
     def build_ui(self) -> None:
-        # Header / icon image (optional)
+        # Header / icon
         try:
-            if ICON_PATH.exists():
-                img = Image.open(ICON_PATH).resize((64, 64))
-                self._logo = ImageTk.PhotoImage(img)
-                tk.Label(self.root, image=self._logo, bg="#0e1a40").pack(pady=8)
-            else:
-                raise FileNotFoundError
+            img = Image.open(ICON_PATH).resize((64, 64))
+            self._logo = ImageTk.PhotoImage(img)
+            tk.Label(self.root, image=self._logo, bg="#0e1a40").pack(pady=8)
         except Exception:
             tk.Label(
                 self.root,
@@ -317,12 +282,7 @@ class DesktopAutomationUI:
 
     def on_close(self) -> None:
         # Stop the presser so it doesn't keep running after UI closes.
-        self.presser.shutdown()
-        try:
-            if self._show_hotkey_id is not None:
-                keyboard.remove_hotkey(self._show_hotkey_id)
-        except Exception:
-            pass
+        self.presser.stop()
         self.root.destroy()
 
     # ----- hotkey capture (non-blocking) -----
@@ -332,10 +292,10 @@ class DesktopAutomationUI:
         self.combo_button.config(state="disabled")
 
         def worker():
-            combo = None
             try:
                 combo = keyboard.read_hotkey(suppress=False)
             except Exception as e:
+                combo = None
                 self.root.after(0, lambda: messagebox.showerror("Error", f"Failed to capture hotkey: {e}"))
 
             def finish():
@@ -355,7 +315,7 @@ class DesktopAutomationUI:
     def apply_settings(self) -> None:
         key = self.key_entry.get().strip()
         delay_text = self.delay_entry.get().strip()
-        combo = (self.hotkey_candidate or DEFAULT_HOTKEY).strip()
+        combo = self.hotkey_candidate or DEFAULT_HOTKEY
 
         if not key:
             messagebox.showerror("Missing Key", "Please enter a target key.")
@@ -387,13 +347,6 @@ class DesktopAutomationUI:
     def update_status(self, is_active: bool) -> None:
         if is_active:
             play_sound(ACTIVATE_WAV)
-
-            # Remove focus from entry fields before hiding the window
-            try:
-                self.root.focus_set()
-            except Exception:
-                pass
-
             self.status_button.config(text="✅ Macro Active", bg="#3aff5a", fg="black")
             self.hide_window()
         else:

@@ -80,6 +80,14 @@ python main.py
 
 ---
 
+## Optional: Windows .exe
+
+If you prefer not to run Python locally, you can download the prebuilt Windows executable from the **Releases** page.
+
+> Note: The .exe is provided for convenience. The source code remains the primary reference for this project.
+
+---
+
 ## Notes
 
 This tool is intended for personal automation and productivity use.  
