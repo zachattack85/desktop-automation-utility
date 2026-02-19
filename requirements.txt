@@ -1,4 +1,4 @@
-pyautogui
 keyboard
+pyautogui
 Pillow
-playsound==1.2.2
+playsound

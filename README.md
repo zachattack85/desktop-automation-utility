@@ -5,12 +5,7 @@
 
 A configurable hotkey-driven desktop automation utility built in Python.
 
-Supports a toggleable key-press loop with adjustable delay, persistent configuration, and non-blocking audio feedback.
-
-Designed to simplify repetitive desktop tasks with a lightweight, hotkey-based workflow.
-
-
-
+Supports a toggleable key-press loop with adjustable delay, persistent configuration, and non-blocking audio feedback — designed to simplify repetitive desktop tasks with a lightweight, hotkey-based workflow.
 
 ---
 
@@ -62,7 +57,7 @@ Designed to simplify repetitive desktop tasks with a lightweight, hotkey-based w
 
 ---
 
-## Technical Highlights
+## Architecture & Concepts
 
 This project demonstrates:
 
@@ -80,28 +75,6 @@ This project demonstrates:
 git clone https://github.com/zachattack85/desktop-automation-utility.git
 cd desktop-automation-utility
 pip install -r requirements.txt
-python main.py
-
----
-
-## How to Run
-
-### 1. Clone the repository
-
-```bash
-git clone https://github.com/zachattack85/desktop-automation-utility.git
-cd desktop-automation-utility
-```
-
-### 2. Install dependencies
-
-```bash
-pip install -r requirements.txt
-```
-
-### 3. Run the application
-
-```bash
 python main.py
 ```
 
