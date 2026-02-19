@@ -1,7 +1,12 @@
 # Desktop Automation Utility
 
+![Python](https://img.shields.io/badge/Python-3.x-blue)
+![License](https://img.shields.io/badge/License-MIT-green)
+
 A configurable hotkey-driven desktop automation utility built in Python.  
-Supports a toggleable press loop with adjustable delay and audio feedback for start and stop actions.
+Supports a toggleable key press loop with adjustable delay and audio feedback for activation and deactivation.
+Designed to simplify repetitive desktop tasks with a lightweight, hotkey-based workflow.
+
 
 ---
 
@@ -21,6 +26,15 @@ Supports a toggleable press loop with adjustable delay and audio feedback for st
 - Settings saved to a local configuration file  
 - Non-blocking sound feedback on activation and deactivation  
 - Simple graphical interface for quick adjustments  
+
+---
+
+## Configuration
+
+- **Target Key** – The key that will be repeatedly pressed
+- **Hotkey Combo** – Global shortcut used to toggle automation
+- **Delay (ms)** – Time between simulated key presses
+- Settings persist between sessions via a local configuration file
 
 ---
 
